@@ -24,44 +24,52 @@ suite 'escomplex-coffee:', ->
     test 'analyse function is exported', ->
       assert.isFunction escomplex.analyse
 
-    test 'analyse throws when source is invalid CoffeeScript string', ->
-      assert.throws ->
-        escomplex.analyse 'foo ='
+    test 'analyse throws when source is invalid CoffeeScript string', (done) ->
+      escomplex.analyse 'foo =', null, (e) ->
+        assert.isNotNull e
+        done()
 
-    test 'analyse does not throw when source is valid CoffeeScript string', ->
-      assert.doesNotThrow ->
-        escomplex.analyse 'foo = "#{foo}"\nunless foo isnt "foo"\n  console.log "foo"\n  foo = undefined\nelse\n  console.log foo'
+    test 'analyse does not throw when source is valid CoffeeScript string', (done) ->
+      escomplex.analyse 'foo = "#{foo}"\nunless foo isnt "foo"\n  console.log "foo"\n  foo = undefined\nelse\n  console.log foo', null, (e) ->
+        assert.isNull e
+        done e
 
-    test 'analyse does not throw when source is valid CoffeeScript comment', ->
-      assert.doesNotThrow ->
-        escomplex.analyse '# comment'
+    test 'analyse does not throw when source is valid CoffeeScript comment', (done) ->
+      escomplex.analyse '# comment', null, (e) ->
+        assert.isNull e
+        done e
 
-    test 'analyse does not throw when source is valid array', ->
-      assert.doesNotThrow ->
-        escomplex.analyse [
-          { code: '"foo"', path: 'foo' }
-          { code: '"bar"', path: 'bar' }
-        ]
+    test 'analyse does not throw when source is valid array', (done) ->
+      escomplex.analyse [
+        { code: '"foo"', path: 'foo' }
+        { code: '"bar"', path: 'bar' }
+      ], null, (e) ->
+        assert.isNull e
+        done e
 
-    test 'analyse throws when source array contains invalid CoffeeScript', ->
-      assert.throws ->
-        escomplex.analyse [
-          { code: 'foo =', path: 'foo' }
-          { code: '"bar"', path: 'bar' }
-        ]
+    test 'analyse throws when source array contains invalid CoffeeScript', (done) ->
+      escomplex.analyse [
+        { code: 'foo =', path: 'foo' }
+        { code: '"bar"', path: 'bar' }
+      ], null, (e) ->
+        assert.isNotNull e
+        done()
 
-    test 'analyse throws when source array is missing path', ->
-      assert.throws ->
-        escomplex.analyse [
-          { code: '"foo"', path: 'foo' }
-          { code: '"bar"' }
-        ]
+    test 'analyse throws when source array is missing path', (done) ->
+      escomplex.analyse [
+        { code: '"foo"', path: 'foo' }
+        { code: '"bar"' }
+      ], null, (e) ->
+        assert.isNotNull e
+        done()
 
     suite 'analyse string:', ->
       result = undefined
 
-      setup ->
-        result = escomplex.analyse '"foo"'
+      setup (done) ->
+        escomplex.analyse '"foo"', null, (e, r) ->
+          result = r
+          done e
 
       teardown ->
         result = undefined
@@ -84,8 +92,10 @@ suite 'escomplex-coffee:', ->
     suite 'analyse array:', ->
       result = undefined
 
-      setup ->
-        result = escomplex.analyse [ { code: '"foo"', path: 'foo' } ]
+      setup (done) ->
+        escomplex.analyse [ { code: '"foo"', path: 'foo' } ], null, (e, r) ->
+          result = r
+          done e
 
       teardown ->
         result = undefined
@@ -106,8 +116,8 @@ suite 'escomplex-coffee:', ->
     suite 'analyse conditions:', ->
       result = undefined
 
-      setup ->
-        result = escomplex.analyse """
+      setup (done) ->
+        escomplex.analyse """
                                    foo = Math.random()
                                    bar = Math.random()
 
@@ -116,7 +126,9 @@ suite 'escomplex-coffee:', ->
 
                                    unless foo is bar
                                      console.log 'foo still isnt bar'
-                                   """
+                                   """, null, (e, r) ->
+          result = r
+          done e
 
       teardown ->
         result = undefined
